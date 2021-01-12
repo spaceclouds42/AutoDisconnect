@@ -1,6 +1,5 @@
 package autodisconnect.config
 
-import autodisconnect.Common
 import net.minecraft.entity.player.PlayerEntity
 
 data class Config
@@ -9,29 +8,21 @@ data class Config
 
     var disconnectOnPlayerRender: Boolean = true,
 
-    var healthDisconnect: Boolean = false,
+    var healthDisconnect: Boolean = true,
 
     var healthThreshold: Double = 10.0,
 
     var stayWhenFriendRender: Boolean = true,
 
     val friendList: List<PlayerEntity> = listOf(),
-) {
+)
+{
     companion object {
-        lateinit var SETTINGS: Config
-
-        fun init() {
-            SETTINGS = loadConfig()
-        }
-
-        private fun loadConfig(): Config {
+        fun loadConfig(): Config {
             return Config()
         }
-    }
+        private fun createConfig() {
 
-
-
-    private fun createConfig() {
-
+        }
     }
 }
