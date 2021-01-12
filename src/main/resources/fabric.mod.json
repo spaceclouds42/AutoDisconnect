@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "randomrespawn",
+  "version": "${version}",
+
+  "name": "AutoDisconnect",
+  "description": "Automagically disconnects when a player comes into render distance",
+
+  "authors": [
+    "SpaceClouds42"
+  ],
+
+  "contact": {
+    "homepage": "https://github.com/SpaceClouds42/AutoDisconnect",
+    "sources": "https://github.com/SpaceClouds42/AutoDisconnect"
+  },
+
+  "license": "LGPL-3.0",
+
+  "environment": "*",
+
+  "entrypoints": {
+    "main": [
+      {
+        "value": "autodisconnect.Common::INSTANCE"
+      }
+    ]
+  },
+
+  "mixins": [
+    "autodisconnect.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.8.7",
+    "fabric": "*",
+    "fabric-language-kotlin": "*",
+    "minecraft": "1.17.x"
+  },
+
+  "suggests": {
+
+  }
+}
