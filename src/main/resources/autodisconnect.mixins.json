@@ -3,7 +3,8 @@
   "package": "autodisconnect.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ClientPlayerEntityMixin"
+    "ClientPlayerEntityMixin",
+    "ClientWorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1
