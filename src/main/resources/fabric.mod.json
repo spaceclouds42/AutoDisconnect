@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "randomrespawn",
+  "id": "autodisconnect",
   "version": "${version}",
 
   "name": "AutoDisconnect",
