@@ -35,11 +35,12 @@ abstract public class ClientPlayerEntityMixin {
                         "Health dropped below " + SETTINGS.getHealthThreshold()
                     ).formatted(Formatting.RED)
             );
+    private final ClientPlayerEntity player = MINECRAFT_CLIENT.player;
 
     @Inject(method = "applyDamage", at = @At("TAIL"))
     private void updateHealth(DamageSource source, float amount, CallbackInfo ci) {
-        if (MINECRAFT_CLIENT.player.getHealth() <= SETTINGS.getHealthThreshold() && SETTINGS.getHealthDisconnect()) {
-            MINECRAFT_CLIENT.player.networkHandler.onDisconnect(new DisconnectS2CPacket(disconnectMessage));
+        if (SETTINGS.getHealthDisconnect() && player.getHealth() <= SETTINGS.getHealthThreshold() && !player.isDead()) {
+            player.networkHandler.onDisconnect(new DisconnectS2CPacket(disconnectMessage));
         }
     }
 }
