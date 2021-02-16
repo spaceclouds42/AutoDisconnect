@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static autodisconnect.Globals.MINECRAFT_CLIENT;
 import static autodisconnect.Globals.SETTINGS;
+import static net.minecraft.util.Util.NIL_UUID;
 
 @Mixin(ClientPlayerEntity.class)
 abstract public class ClientPlayerEntityMixin {
@@ -39,8 +40,37 @@ abstract public class ClientPlayerEntityMixin {
 
     @Inject(method = "applyDamage", at = @At("TAIL"))
     private void updateHealth(DamageSource source, float amount, CallbackInfo ci) {
-        if (SETTINGS.getHealthDisconnect() && player.getHealth() <= SETTINGS.getHealthThreshold() && !player.isDead()) {
+        if (SETTINGS.getHealthDisconnectEnabled() && player.getHealth() <= SETTINGS.getHealthThreshold() && !player.isDead()) {
             player.networkHandler.onDisconnect(new DisconnectS2CPacket(disconnectMessage));
+        }
+    }
+
+    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    private void changeSettings(String message, CallbackInfo ci) {
+        if (message.equals("/autodisconnect players true")) {
+            ci.cancel();
+            SETTINGS.setPlayerDisconnectEnabled(true);
+            MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Player disconnect enabled").formatted(Formatting.GREEN), NIL_UUID);
+        } else if (message.equals("/autodisconnect players false")) {
+            ci.cancel();
+            SETTINGS.setPlayerDisconnectEnabled(false);
+            MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Player disconnect disabled").formatted(Formatting.RED), NIL_UUID);
+        } else if (message.equals("/autodisconnect health true")) {
+            ci.cancel();
+            SETTINGS.setHealthDisconnectEnabled(true);
+            MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Health disconnect enabled").formatted(Formatting.GREEN), NIL_UUID);
+        } else if (message.equals("/autodisconnect health false")) {
+            ci.cancel();
+            SETTINGS.setHealthDisconnectEnabled(false);
+            MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Health disconnect disabled").formatted(Formatting.RED), NIL_UUID);
+        } else if (message.startsWith("/autodisconnect health ")) {
+            try {
+                double threshold = Double.parseDouble(message.substring(23));
+                SETTINGS.setHealthThreshold(threshold);
+                MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Health disconnect threshold set to " + threshold).formatted(Formatting.GREEN), NIL_UUID);
+            } catch (NumberFormatException e) {
+                MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Please enter a valid number").formatted(Formatting.RED), NIL_UUID);
+            }
         }
     }
 }
