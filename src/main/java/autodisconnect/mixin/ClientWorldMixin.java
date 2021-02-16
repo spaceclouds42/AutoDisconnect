@@ -37,7 +37,7 @@ abstract public class ClientWorldMixin {
     @Inject(method = "addEntityPrivate", at = @At("TAIL"))
     private void addEntityPrivate(int id, Entity entity, CallbackInfo ci) {
         if (entity.getUuid().equals(MINECRAFT_CLIENT.player.getUuid())) { return; }
-        if ((entity instanceof PlayerEntity || entity instanceof ShulkerEntity) && SETTINGS.getPlayerDisconnectEnabled()) {
+        if (entity instanceof PlayerEntity && SETTINGS.getPlayerDisconnectEnabled()) {
             disconnect(entity);
             SETTINGS.setPlayerDisconnectEnabled(false);
         }
