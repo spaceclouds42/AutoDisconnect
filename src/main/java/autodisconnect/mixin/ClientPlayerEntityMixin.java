@@ -17,31 +17,30 @@ import static net.minecraft.util.Util.NIL_UUID;
 
 @Mixin(ClientPlayerEntity.class)
 abstract public class ClientPlayerEntityMixin {
-    private final MutableText disconnectMessage =
-            new LiteralText(
-                    "["
-                ).formatted(Formatting.GRAY)
-            .append(
-                    new LiteralText(
-                        "AutoDisconnect"
-                ).formatted(Formatting.DARK_AQUA)
-            )
-            .append(
-                    new LiteralText(
-                        "]\n"
-                ).formatted(Formatting.GRAY)
-            )
-            .append(
-                    new LiteralText(
-                        "Health dropped below " + SETTINGS.getHealthThreshold()
-                    ).formatted(Formatting.RED)
-            );
-    private final ClientPlayerEntity player = MINECRAFT_CLIENT.player;
-
     @Inject(method = "applyDamage", at = @At("TAIL"))
     private void updateHealth(DamageSource source, float amount, CallbackInfo ci) {
-        if (SETTINGS.getHealthDisconnectEnabled() && player.getHealth() <= SETTINGS.getHealthThreshold() && !player.isDead()) {
-            player.networkHandler.onDisconnect(new DisconnectS2CPacket(disconnectMessage));
+        if (SETTINGS.getHealthDisconnectEnabled() && MINECRAFT_CLIENT.player.getHealth() <= SETTINGS.getHealthThreshold() && !MINECRAFT_CLIENT.player.isDead()) {
+            MutableText disconnectMessage =
+                    new LiteralText(
+                            "["
+                    ).formatted(Formatting.GRAY)
+                            .append(
+                                    new LiteralText(
+                                            "AutoDisconnect"
+                                    ).formatted(Formatting.DARK_AQUA)
+                            )
+                            .append(
+                                    new LiteralText(
+                                            "]\n"
+                                    ).formatted(Formatting.GRAY)
+                            )
+                            .append(
+                                    new LiteralText(
+                                            "Health dropped below " + SETTINGS.getHealthThreshold()
+                                    ).formatted(Formatting.RED)
+                            );
+            MINECRAFT_CLIENT.player.networkHandler.onDisconnect(new DisconnectS2CPacket(disconnectMessage));
+            SETTINGS.setHealthDisconnectEnabled(false);
         }
     }
 
@@ -64,6 +63,7 @@ abstract public class ClientPlayerEntityMixin {
             SETTINGS.setHealthDisconnectEnabled(false);
             MINECRAFT_CLIENT.player.sendSystemMessage(new LiteralText("Health disconnect disabled").formatted(Formatting.RED), NIL_UUID);
         } else if (message.startsWith("/autodisconnect health ")) {
+            ci.cancel();
             try {
                 double threshold = Double.parseDouble(message.substring(23));
                 SETTINGS.setHealthThreshold(threshold);

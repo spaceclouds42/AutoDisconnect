@@ -3,6 +3,7 @@ package autodisconnect.mixin;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -33,21 +34,27 @@ abstract public class ClientWorldMixin {
                                     "]"
                             ).formatted(Formatting.GRAY)
                     );
-    private final ClientPlayerEntity player = MINECRAFT_CLIENT.player;
 
     @Inject(method = "addEntityPrivate", at = @At("TAIL"))
     private void addEntityPrivate(int id, Entity entity, CallbackInfo ci) {
-        if (entity instanceof PlayerEntity && SETTINGS.getPlayerDisconnectEnabled()) {
+        if (entity.getUuid().equals(MINECRAFT_CLIENT.player.getUuid())) { return; }
+        if ((entity instanceof PlayerEntity || entity instanceof ShulkerEntity) && SETTINGS.getPlayerDisconnectEnabled()) {
             disconnect(entity);
+            SETTINGS.setPlayerDisconnectEnabled(false);
         }
     }
 
     private void disconnect(Entity entity) {
-        if (player == null) { return; }
-        player.networkHandler.onDisconnect(new DisconnectS2CPacket(alertMessage.append(
+        MINECRAFT_CLIENT.player.networkHandler.onDisconnect(new DisconnectS2CPacket(alertMessage.append(
                 new LiteralText(
-                        "\n" + entity.getEntityName() + " entered render distance"
-                ).formatted(Formatting.RED)
+                        "\n"
+                ).formatted(Formatting.RED).append(
+                        entity.getDisplayName()
+                ).formatted(Formatting.RED). append(
+                        new LiteralText(
+                                " entered render distance\nWARNING: Player disconnect has now been disabled"
+                        ).formatted(Formatting.RED)
+                )
         )));
     }
 }
